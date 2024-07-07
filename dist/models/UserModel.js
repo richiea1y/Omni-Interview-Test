@@ -43,7 +43,7 @@ const UserSchema = new mongoose_1.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isActive: { type: Boolean, required: true, default: true },
-    avatar: { type: String, required: true }
+    avatar: { type: String, required: false } // Changed to required: false
 });
 // Add this function to get the default avatar
 const getDefaultAvatar = () => {
