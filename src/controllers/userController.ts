@@ -5,8 +5,13 @@ import { Document } from 'mongoose';
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { username, password, email, firstName, lastName, avatar } = req.body;
-    const user = new User({ username, password, email, firstName, lastName, avatar });
+    const { username, password, avatar } = req.body;
+    const user = new User({ 
+      username, 
+      password, 
+      isActive: true, // Set isActive to true by default
+      avatar: avatar || 'default_avatar_base64_string' // You might want to set a default avatar if not provided
+    });
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
