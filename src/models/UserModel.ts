@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcrypt';
 import fs from 'fs';
-import path from 'path';
+import config from '../config/config';
 
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
@@ -21,9 +21,14 @@ const UserSchema: Schema = new Schema({
 
 // Add this function to get the default avatar
 const getDefaultAvatar = (): string => {
-  const defaultAvatarPath = path.join(__dirname, '..', 'asset', 'images', 'user-icon.png');
-  const defaultAvatar = fs.readFileSync(defaultAvatarPath);
-  return `data:image/png;base64,${defaultAvatar.toString('base64')}`;
+  try {
+    const defaultAvatar = fs.readFileSync(config.defaultAvatarPath);
+    return `data:image/png;base64,${defaultAvatar.toString('base64')}`;
+  } catch (error) {
+    console.error('Error reading default avatar:', error);
+    // Return a fallback base64 string for a simple default avatar
+    return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+  }
 };
 
 // Modify the pre-save hook

@@ -38,7 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
+const config_1 = __importDefault(require("../config/config"));
 const UserSchema = new mongoose_1.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -47,9 +47,15 @@ const UserSchema = new mongoose_1.Schema({
 });
 // Add this function to get the default avatar
 const getDefaultAvatar = () => {
-    const defaultAvatarPath = path_1.default.join(__dirname, '..', 'asset', 'images', 'user-icon.png');
-    const defaultAvatar = fs_1.default.readFileSync(defaultAvatarPath);
-    return `data:image/png;base64,${defaultAvatar.toString('base64')}`;
+    try {
+        const defaultAvatar = fs_1.default.readFileSync(config_1.default.defaultAvatarPath);
+        return `data:image/png;base64,${defaultAvatar.toString('base64')}`;
+    }
+    catch (error) {
+        console.error('Error reading default avatar:', error);
+        // Return a fallback base64 string for a simple default avatar
+        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+    }
 };
 // Modify the pre-save hook
 UserSchema.pre('save', function (next) {
