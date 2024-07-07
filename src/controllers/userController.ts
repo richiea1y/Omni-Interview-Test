@@ -8,9 +8,9 @@ export const register = async (req: Request, res: Response) => {
     const { username, password, avatar } = req.body;
     const user = new User({ 
       username, 
-      password, 
-      isActive: true, // Set isActive to true by default
-      avatar: avatar || 'default_avatar_base64_string' // You might want to set a default avatar if not provided
+      password,
+      isActive: true,
+      avatar // This can be undefined, and the pre-save hook will set the default
     });
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });

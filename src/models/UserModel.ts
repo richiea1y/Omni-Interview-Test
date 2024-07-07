@@ -15,28 +15,30 @@ export interface IUser extends Document {
 const UserSchema: Schema = new Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  isActive: { type: Boolean, required: true },
+  isActive: { type: Boolean, required: true, default: true },
   avatar: { type: String, required: true }
 });
 
-UserSchema.pre<IUser>('save', async function (next) {
-  if (!this.isModified('password')) return next();
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+// Add this function to get the default avatar
+const getDefaultAvatar = (): string => {
+  const defaultAvatarPath = path.join(__dirname, '..', 'asset', 'images', 'user-icon.png');
+  const defaultAvatar = fs.readFileSync(defaultAvatarPath);
+  return `data:image/png;base64,${defaultAvatar.toString('base64')}`;
 };
 
-UserSchema.pre<IUser>('save', function (next) {
+// Modify the pre-save hook
+UserSchema.pre<IUser>('save', async function (next) {
+  if (!this.isModified('password') && this.avatar) return next();
+
   if (!this.avatar) {
-    const defaultAvatarPath = path.join(__dirname, '..', 'asset', 'images', 'user-icon.png');
-    const defaultAvatar = fs.readFileSync(defaultAvatarPath);
-    this.avatar = `data:image/png;base64,${defaultAvatar.toString('base64')}`;
+    this.avatar = getDefaultAvatar();
   }
+
+  if (this.isModified('password')) {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+  }
+
   next();
 });
 

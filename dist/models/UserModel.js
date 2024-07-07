@@ -42,29 +42,28 @@ const path_1 = __importDefault(require("path"));
 const UserSchema = new mongoose_1.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    isActive: { type: Boolean, required: true },
+    isActive: { type: Boolean, required: true, default: true },
     avatar: { type: String, required: true }
 });
+// Add this function to get the default avatar
+const getDefaultAvatar = () => {
+    const defaultAvatarPath = path_1.default.join(__dirname, '..', 'asset', 'images', 'user-icon.png');
+    const defaultAvatar = fs_1.default.readFileSync(defaultAvatarPath);
+    return `data:image/png;base64,${defaultAvatar.toString('base64')}`;
+};
+// Modify the pre-save hook
 UserSchema.pre('save', function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!this.isModified('password'))
+        if (!this.isModified('password') && this.avatar)
             return next();
-        const salt = yield bcrypt_1.default.genSalt(10);
-        this.password = yield bcrypt_1.default.hash(this.password, salt);
+        if (!this.avatar) {
+            this.avatar = getDefaultAvatar();
+        }
+        if (this.isModified('password')) {
+            const salt = yield bcrypt_1.default.genSalt(10);
+            this.password = yield bcrypt_1.default.hash(this.password, salt);
+        }
         next();
     });
-});
-UserSchema.methods.comparePassword = function (candidatePassword) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return bcrypt_1.default.compare(candidatePassword, this.password);
-    });
-};
-UserSchema.pre('save', function (next) {
-    if (!this.avatar) {
-        const defaultAvatarPath = path_1.default.join(__dirname, '..', 'asset', 'images', 'user-icon.png');
-        const defaultAvatar = fs_1.default.readFileSync(defaultAvatarPath);
-        this.avatar = `data:image/png;base64,${defaultAvatar.toString('base64')}`;
-    }
-    next();
 });
 exports.default = mongoose_1.default.model('User', UserSchema);

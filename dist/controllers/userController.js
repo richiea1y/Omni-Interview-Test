@@ -17,8 +17,13 @@ const UserModel_1 = __importDefault(require("../models/UserModel"));
 const jwt_1 = require("../utils/jwt");
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, email, firstName, lastName, avatar } = req.body;
-        const user = new UserModel_1.default({ username, password, email, firstName, lastName, avatar });
+        const { username, password, avatar } = req.body;
+        const user = new UserModel_1.default({
+            username,
+            password,
+            isActive: true,
+            avatar // This can be undefined, and the pre-save hook will set the default
+        });
         yield user.save();
         res.status(201).json({ message: 'User registered successfully' });
     }
