@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import User, { IUser } from '../models/UserModel';
 import { generateToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
+import { Document } from 'mongoose';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -16,14 +17,14 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }) as IUser & Document;
 
     if (!user || !(await user.comparePassword(password))) {
       return res.sendStatus(204);
     }
 
-    const token = generateToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
+    const token = generateToken(user._id.toString());
+    const refreshToken = generateRefreshToken(user._id.toString());
 
     res.status(200).json({ token, refreshToken });
   } catch (error) {
@@ -33,7 +34,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const changePassword = async (req: Request, res: Response) => {
   try {
-    const userId = req.user.userId;
+    const userId = (req as any).user.userId;
     const { oldPassword, newPassword } = req.body;
 
     const user = await User.findById(userId);
