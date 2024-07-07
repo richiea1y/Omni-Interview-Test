@@ -1,7 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+// Define a custom interface extending Request
+interface AuthenticatedRequest extends Request {
+  user?: any;
+}
+
+export const authenticateJWT = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const authHeader = req.headers.authorization;
 
   if (authHeader) {
