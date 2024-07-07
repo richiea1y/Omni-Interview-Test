@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 export interface IUser extends Document {
+  _id: mongoose.Types.ObjectId;
   username: string;
   password: string;
   isActive: boolean;
